@@ -20,7 +20,9 @@ export const metadata: Metadata = {
     description: "Prenez les bonnes décisions financières en 30 secondes.",
   },
   icons: {
-    icon: "/favicon.ico",
+    icon: "/ryvo-logo.png",
+    shortcut: "/ryvo-logo.png",
+    apple: "/ryvo-logo.png",
   },
 };
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, useEffect } from "react";
-import { motion, useScroll, useTransform, MotionValue } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { Zap, Bell, RefreshCw, TrendingUp, MessageSquare, Shield } from "lucide-react";
 
 /* ── Terminal mockup ── */
@@ -36,20 +36,18 @@ function TerminalMockup() {
         <div className="w-2.5 h-2.5 rounded-full bg-[#5DBB8A]/50" />
         <span className="ml-2 text-[#5B8A6F] text-[10px]">ryvo — terminal</span>
       </div>
-      {lines.map((l, i) => (
-        <p key={i} className={`${l.color} leading-relaxed`}>{l.text}</p>
-      ))}
+      {lines.map((l, i) => <p key={i} className={`${l.color} leading-relaxed`}>{l.text}</p>)}
       {lines.length < terminalLines.length && <span className="text-[#5DBB8A]">▋</span>}
     </div>
   );
 }
 
-/* ── Node graph mockup ── */
+/* ── Node graph ── */
 const nodes = [
-  { id: "bank",   label: "Banques",  x: 10, y: 40, color: "#2A5240" },
-  { id: "ryvo",   label: "Ryvo IA",  x: 45, y: 40, color: "#B8935A" },
-  { id: "alert",  label: "Alertes",  x: 80, y: 15, color: "#D4AF7A" },
-  { id: "report", label: "Rapport",  x: 80, y: 65, color: "#2D7A4F" },
+  { id: "bank", label: "Banques", x: 10, y: 40, color: "#2A5240" },
+  { id: "ryvo", label: "Ryvo IA", x: 45, y: 40, color: "#B8935A" },
+  { id: "alert", label: "Alertes", x: 80, y: 15, color: "#D4AF7A" },
+  { id: "report", label: "Rapport", x: 80, y: 65, color: "#2D7A4F" },
 ];
 
 function NodeGraph() {
@@ -59,31 +57,25 @@ function NodeGraph() {
     return () => clearInterval(t);
   }, []);
   return (
-    <div className="rounded-xl bg-[#0D1E15] border border-[rgba(42,82,64,0.3)] p-4 h-40 relative overflow-hidden w-full">
+    <div className="rounded-xl bg-[#0D1E15] border border-[rgba(42,82,64,0.3)] p-4 h-40 w-full overflow-hidden">
       <svg width="100%" height="100%" viewBox="0 0 100 80" preserveAspectRatio="xMidYMid meet">
         {[
           { from: nodes[0], to: nodes[1], active: step >= 1 },
           { from: nodes[1], to: nodes[2], active: step >= 2 },
           { from: nodes[1], to: nodes[3], active: step >= 3 },
         ].map(({ from, to, active }, i) => (
-          <line key={i}
-            x1={from.x + 7} y1={from.y} x2={to.x - 7} y2={to.y}
+          <line key={i} x1={from.x + 7} y1={from.y} x2={to.x - 7} y2={to.y}
             stroke={active ? "#3D6B54" : "rgba(42,82,64,0.15)"}
-            strokeWidth={active ? "0.8" : "0.5"}
-            strokeDasharray={active ? "none" : "2,2"}
-            className="transition-all duration-500"
-          />
+            strokeWidth={active ? "0.8" : "0.5"} strokeDasharray={active ? "none" : "2,2"}
+            className="transition-all duration-500" />
         ))}
         {nodes.map((n, i) => (
           <g key={n.id}>
             <circle cx={n.x} cy={n.y} r="7"
               fill={step >= i ? n.color + "22" : "rgba(42,82,64,0.04)"}
               stroke={step >= i ? n.color : "rgba(42,82,64,0.2)"}
-              strokeWidth="0.8" className="transition-all duration-300"
-            />
-            <text x={n.x} y={n.y + 14} textAnchor="middle" fill="#5B8A6F" fontSize="5" fontFamily="Inter, sans-serif">
-              {n.label}
-            </text>
+              strokeWidth="0.8" className="transition-all duration-300" />
+            <text x={n.x} y={n.y + 14} textAnchor="middle" fill="#5B8A6F" fontSize="5" fontFamily="Inter, sans-serif">{n.label}</text>
           </g>
         ))}
       </svg>
@@ -95,42 +87,29 @@ function NodeGraph() {
 function IOMockup() {
   const [phase, setPhase] = useState<"idle" | "typing" | "loading" | "response">("idle");
   const [text, setText] = useState("");
-  const fullQuestion = "Puis-je payer les salaires demain ?";
-  const answer = "✓ Oui. Solde 87 420 €. Masse salariale ≈22 000 €. Il restera 65 420 € après paiement.";
+  const fullQ = "Puis-je payer les salaires demain ?";
+  const answer = "✓ Oui. Solde 87 420 €. Masse salariale ≈22 000 €. Restera 65 420 € après.";
   useEffect(() => {
-    let timer: ReturnType<typeof setTimeout>;
-    if (phase === "idle") { timer = setTimeout(() => setPhase("typing"), 800); }
+    let t: ReturnType<typeof setTimeout>;
+    if (phase === "idle") { t = setTimeout(() => setPhase("typing"), 800); }
     else if (phase === "typing") {
       let i = 0;
-      const iv = setInterval(() => {
-        i++; setText(fullQuestion.slice(0, i));
-        if (i >= fullQuestion.length) { clearInterval(iv); setPhase("loading"); }
-      }, 45);
+      const iv = setInterval(() => { i++; setText(fullQ.slice(0, i)); if (i >= fullQ.length) { clearInterval(iv); setPhase("loading"); } }, 45);
       return () => clearInterval(iv);
-    } else if (phase === "loading") { timer = setTimeout(() => setPhase("response"), 1200); }
-    else if (phase === "response") { timer = setTimeout(() => { setText(""); setPhase("idle"); }, 4000); }
-    return () => clearTimeout(timer);
+    } else if (phase === "loading") { t = setTimeout(() => setPhase("response"), 1200); }
+    else { t = setTimeout(() => { setText(""); setPhase("idle"); }, 4000); }
+    return () => clearTimeout(t);
   }, [phase]);
   return (
     <div className="rounded-xl bg-[#0D1E15] border border-[rgba(42,82,64,0.3)] p-4 h-40 flex flex-col justify-between w-full">
       <div className="flex-1">
-        {phase === "response" ? (
-          <p className="text-xs text-[#5DBB8A] leading-relaxed">{answer}</p>
-        ) : phase === "loading" ? (
-          <div className="flex gap-1 items-center h-6">
-            {[0, 0.15, 0.3].map((d) => (
-              <div key={d} className="w-1.5 h-1.5 bg-[#3D6B54] rounded-full animate-bounce" style={{ animationDelay: `${d}s` }} />
-            ))}
-          </div>
-        ) : (
-          <p className="text-xs text-[#5B8A6F]">{text}<span className="animate-blink text-[#5DBB8A]">|</span></p>
-        )}
+        {phase === "response" ? <p className="text-xs text-[#5DBB8A] leading-relaxed">{answer}</p>
+          : phase === "loading" ? <div className="flex gap-1 items-center h-6">{[0,.15,.3].map(d => <div key={d} className="w-1.5 h-1.5 bg-[#3D6B54] rounded-full animate-bounce" style={{ animationDelay: `${d}s` }} />)}</div>
+          : <p className="text-xs text-[#5B8A6F]">{text}<span className="animate-blink text-[#5DBB8A]">|</span></p>}
       </div>
       <div className="mt-3 flex items-center gap-2 border-t border-[rgba(42,82,64,0.2)] pt-3">
         <div className="flex-1 h-7 bg-[rgba(42,82,64,0.08)] rounded-lg border border-[rgba(42,82,64,0.15)]" />
-        <div className="w-7 h-7 bg-[#2A5240]/40 rounded-lg flex items-center justify-center">
-          <Zap size={12} className="text-[#5DBB8A]" />
-        </div>
+        <div className="w-7 h-7 bg-[#2A5240]/40 rounded-lg flex items-center justify-center"><Zap size={12} className="text-[#5DBB8A]" /></div>
       </div>
     </div>
   );
@@ -144,26 +123,13 @@ function ForecastMockup() {
     setProgress(0);
     let p = 0;
     const iv = setInterval(() => {
-      p += 0.018;
-      if (p >= 1) { clearInterval(iv); setTimeout(() => setCycle((c) => c + 1), 1200); return; }
+      p += 0.018; if (p >= 1) { clearInterval(iv); setTimeout(() => setCycle(c => c + 1), 1200); return; }
       setProgress(p);
     }, 30);
     return () => clearInterval(iv);
   }, [cycle]);
-
-  const pts = [
-    [8, 62], [22, 50], [36, 58], [50, 34], [64, 22], [78, 16], [92, 26],
-  ] as [number, number][];
-
-  const totalLen = pts.reduce((acc, pt, i) => {
-    if (i === 0) return 0;
-    const [px, py] = pts[i - 1];
-    return acc + Math.hypot(pt[0] - px, pt[1] - py);
-  }, 0);
-
-  const pathD = pts.map(([x, y], i) => `${i === 0 ? "M" : "L"} ${x} ${y}`).join(" ");
-  const areaD = `${pathD} L 92 75 L 8 75 Z`;
-
+  const pts: [number, number][] = [[8,62],[22,50],[36,58],[50,34],[64,22],[78,16],[92,26]];
+  const pathD = pts.map(([x,y],i) => `${i===0?"M":"L"} ${x} ${y}`).join(" ");
   return (
     <div className="rounded-xl bg-[#0D1E15] border border-[rgba(42,82,64,0.3)] p-4 h-40 overflow-hidden w-full">
       <div className="flex items-center justify-between mb-2">
@@ -176,29 +142,14 @@ function ForecastMockup() {
             <stop offset="0%" stopColor="#2A5240" stopOpacity="0.5" />
             <stop offset="100%" stopColor="#2A5240" stopOpacity="0.02" />
           </linearGradient>
-          <clipPath id="fg-clip">
-            <rect x="0" y="0" width={`${progress * 100}%`} height="100%" />
-          </clipPath>
+          <clipPath id="fg-clip"><rect x="0" y="0" width={`${progress * 100}%`} height="100%" /></clipPath>
         </defs>
-        <path d={areaD} fill="url(#fg-grad)" clipPath="url(#fg-clip)" />
-        <path
-          d={pathD} fill="none" stroke="#5DBB8A" strokeWidth="1.5"
-          strokeLinecap="round" strokeLinejoin="round"
-          strokeDasharray={totalLen}
-          strokeDashoffset={totalLen * (1 - progress)}
-        />
-        {pts.map(([x, y], i) => (
-          <circle key={i} cx={x} cy={y} r="2" fill="#5DBB8A"
-            opacity={progress > i / pts.length ? 1 : 0}
-            style={{ transition: "opacity 0.2s" }}
-          />
-        ))}
+        <path d={`${pathD} L 92 75 L 8 75 Z`} fill="url(#fg-grad)" clipPath="url(#fg-clip)" />
+        <path d={pathD} fill="none" stroke="#5DBB8A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+          strokeDasharray="200" strokeDashoffset={200*(1-progress)} />
+        {pts.map(([x,y],i) => <circle key={i} cx={x} cy={y} r="2" fill="#5DBB8A" opacity={progress>i/pts.length?1:0} style={{transition:"opacity 0.2s"}} />)}
       </svg>
-      <div className="flex justify-between mt-1">
-        {["Auj", "J+15", "J+30", "J+60", "J+90"].map((l) => (
-          <span key={l} className="text-[9px] text-[#3D5A4A] font-mono">{l}</span>
-        ))}
-      </div>
+      <div className="flex justify-between mt-1">{["Auj","J+15","J+30","J+60","J+90"].map(l => <span key={l} className="text-[9px] text-[#3D5A4A] font-mono">{l}</span>)}</div>
     </div>
   );
 }
@@ -217,10 +168,8 @@ function BriefingMockup() {
   const [cycle, setCycle] = useState(0);
   useEffect(() => {
     setShown([]);
-    const timers = briefingLines.map(({ delay }, i) =>
-      setTimeout(() => setShown((v) => [...v, i]), delay)
-    );
-    const reset = setTimeout(() => setCycle((c) => c + 1), 5000);
+    const timers = briefingLines.map(({ delay }, i) => setTimeout(() => setShown(v => [...v, i]), delay));
+    const reset = setTimeout(() => setCycle(c => c + 1), 5000);
     return () => { timers.forEach(clearTimeout); clearTimeout(reset); };
   }, [cycle]);
   return (
@@ -230,13 +179,9 @@ function BriefingMockup() {
         <span className="text-[#5B8A6F] text-[10px]">ryvo — briefing</span>
       </div>
       {briefingLines.map(({ color }, i) => (
-        <motion.p
-          key={`${cycle}-${i}`}
-          initial={{ opacity: 0, x: -8 }}
+        <motion.p key={`${cycle}-${i}`} initial={{ opacity: 0, x: -8 }}
           animate={shown.includes(i) ? { opacity: 1, x: 0 } : {}}
-          transition={{ duration: 0.28, ease: "easeOut" }}
-          className={`${color} leading-relaxed`}
-        >
+          transition={{ duration: 0.28, ease: "easeOut" }} className={`${color} leading-relaxed`}>
           {briefingLines[i].text}
         </motion.p>
       ))}
@@ -253,7 +198,7 @@ function SecurityMockup() {
   useEffect(() => {
     setCount(0);
     const timers = secChecks.map((_, i) => setTimeout(() => setCount(i + 1), 500 + i * 600));
-    const reset = setTimeout(() => setCycle((c) => c + 1), 5200);
+    const reset = setTimeout(() => setCycle(c => c + 1), 5200);
     return () => { timers.forEach(clearTimeout); clearTimeout(reset); };
   }, [cycle]);
   return (
@@ -267,16 +212,10 @@ function SecurityMockup() {
       </div>
       <div className="space-y-1.5">
         {secChecks.map((c, i) => (
-          <motion.div
-            key={`${cycle}-${i}`}
-            initial={{ opacity: 0, x: -6 }}
-            animate={i < count ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.25, ease: "easeOut" }}
-            className="flex items-center gap-2"
-          >
-            <div className={`w-3.5 h-3.5 rounded-full flex items-center justify-center text-[7px] transition-colors duration-300 ${i < count ? "bg-[#2D7A4F]/30 text-[#5DBB8A]" : "bg-[rgba(42,82,64,0.1)] text-transparent"}`}>
-              ✓
-            </div>
+          <motion.div key={`${cycle}-${i}`} initial={{ opacity: 0, x: -6 }}
+            animate={i < count ? { opacity: 1, x: 0 } : {}} transition={{ duration: 0.25 }}
+            className="flex items-center gap-2">
+            <div className={`w-3.5 h-3.5 rounded-full flex items-center justify-center text-[7px] transition-colors duration-300 ${i < count ? "bg-[#2D7A4F]/30 text-[#5DBB8A]" : "bg-[rgba(42,82,64,0.1)] text-transparent"}`}>✓</div>
             <span className="text-[10px] text-[#5B8A6F] font-mono">{c}</span>
           </motion.div>
         ))}
@@ -285,113 +224,80 @@ function SecurityMockup() {
   );
 }
 
-/* ── Feature definitions ── */
+/* ── Feature data ── */
 type Feature = {
   icon: React.ElementType;
   title: string;
   desc: string;
   mockup: React.ReactNode;
-  accentClass: string;
   iconClass: string;
   borderClass: string;
+  bgFrom: string;
 };
 
 const features: Feature[] = [
-  {
-    icon: Zap,
-    title: "Réponse en 30 secondes",
-    desc: "Posez n'importe quelle question financière. Ryvo analyse vos données en temps réel et répond instantanément avec les chiffres exacts.",
-    mockup: <IOMockup />,
-    accentClass: "from-[#2A5240]/4 to-white",
-    iconClass: "text-[#2A5240] bg-[#2A5240]/8 border-[#2A5240]/20",
-    borderClass: "border-[#2A5240]/12",
-  },
-  {
-    icon: Bell,
-    title: "Alertes proactives",
-    desc: "Ryvo surveille vos comptes 24h/24 et vous alerte avant que les problèmes de trésorerie n'arrivent. Zéro surprise.",
-    mockup: <NodeGraph />,
-    accentClass: "from-[#B8935A]/4 to-white",
-    iconClass: "text-[#B8935A] bg-[#B8935A]/8 border-[#B8935A]/20",
-    borderClass: "border-[#B8935A]/12",
-  },
-  {
-    icon: RefreshCw,
-    title: "Analyse automatique",
-    desc: "Connexion multi-banques sécurisée. Synchronisation en temps réel. Zéro saisie manuelle, zéro délai.",
-    mockup: <TerminalMockup />,
-    accentClass: "from-[#2D7A4F]/4 to-white",
-    iconClass: "text-[#2D7A4F] bg-[#2D7A4F]/8 border-[#2D7A4F]/20",
-    borderClass: "border-[#2D7A4F]/12",
-  },
-  {
-    icon: TrendingUp,
-    title: "Prévision 90 jours",
-    desc: "Anticipez votre trésorerie sur 3 mois avec des modèles IA entraînés sur des milliers de PME françaises.",
-    mockup: <ForecastMockup />,
-    accentClass: "from-[#2A5240]/4 to-white",
-    iconClass: "text-[#2A5240] bg-[#2A5240]/8 border-[#2A5240]/20",
-    borderClass: "border-[#2A5240]/12",
-  },
-  {
-    icon: MessageSquare,
-    title: "Briefing quotidien",
-    desc: "Chaque matin à 7h30, recevez vos priorités du jour par email ou WhatsApp. Directement dans votre poche.",
-    mockup: <BriefingMockup />,
-    accentClass: "from-[#B8935A]/4 to-white",
-    iconClass: "text-[#B8935A] bg-[#B8935A]/8 border-[#B8935A]/20",
-    borderClass: "border-[#B8935A]/12",
-  },
-  {
-    icon: Shield,
-    title: "Sécurité bancaire",
-    desc: "Chiffrement AES-256, hébergement France/UE, RGPD, DSP2. Vos données ne quittent jamais l'Europe.",
-    mockup: <SecurityMockup />,
-    accentClass: "from-[#2D7A4F]/4 to-white",
-    iconClass: "text-[#2D7A4F] bg-[#2D7A4F]/8 border-[#2D7A4F]/20",
-    borderClass: "border-[#2D7A4F]/12",
-  },
+  { icon: Zap, title: "Réponse en 30 secondes", desc: "Posez n'importe quelle question financière. Ryvo analyse vos données en temps réel et répond instantanément avec les chiffres exacts.", mockup: <IOMockup />, iconClass: "text-[#2A5240] bg-[#2A5240]/8 border-[#2A5240]/20", borderClass: "border-[#2A5240]/12", bgFrom: "from-[#2A5240]/3" },
+  { icon: Bell, title: "Alertes proactives", desc: "Ryvo surveille vos comptes 24h/24 et vous alerte avant que les problèmes de trésorerie n'arrivent. Zéro surprise.", mockup: <NodeGraph />, iconClass: "text-[#B8935A] bg-[#B8935A]/8 border-[#B8935A]/20", borderClass: "border-[#B8935A]/12", bgFrom: "from-[#B8935A]/3" },
+  { icon: RefreshCw, title: "Analyse automatique", desc: "Connexion multi-banques sécurisée. Synchronisation en temps réel. Zéro saisie manuelle, zéro délai.", mockup: <TerminalMockup />, iconClass: "text-[#2D7A4F] bg-[#2D7A4F]/8 border-[#2D7A4F]/20", borderClass: "border-[#2D7A4F]/12", bgFrom: "from-[#2D7A4F]/3" },
+  { icon: TrendingUp, title: "Prévision 90 jours", desc: "Anticipez votre trésorerie sur 3 mois avec des modèles IA entraînés sur des milliers de PME françaises.", mockup: <ForecastMockup />, iconClass: "text-[#2A5240] bg-[#2A5240]/8 border-[#2A5240]/20", borderClass: "border-[#2A5240]/12", bgFrom: "from-[#2A5240]/3" },
+  { icon: MessageSquare, title: "Briefing quotidien", desc: "Chaque matin à 7h30, recevez vos priorités du jour par email ou WhatsApp. Directement dans votre poche.", mockup: <BriefingMockup />, iconClass: "text-[#B8935A] bg-[#B8935A]/8 border-[#B8935A]/20", borderClass: "border-[#B8935A]/12", bgFrom: "from-[#B8935A]/3" },
+  { icon: Shield, title: "Sécurité bancaire", desc: "Chiffrement AES-256, hébergement France/UE, RGPD, DSP2. Vos données ne quittent jamais l'Europe.", mockup: <SecurityMockup />, iconClass: "text-[#2D7A4F] bg-[#2D7A4F]/8 border-[#2D7A4F]/20", borderClass: "border-[#2D7A4F]/12", bgFrom: "from-[#2D7A4F]/3" },
 ];
 
-/* ── Stacking card ── */
+/* ── Single stacking card ── */
 function StackCard({
   feature,
   index,
   total,
-  progress,
 }: {
   feature: Feature;
   index: number;
   total: number;
-  progress: MotionValue<number>;
 }) {
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const isLast = index === total - 1;
+
+  // Track scroll of this card's wrapper: progress 0 when wrapper-top = viewport-top,
+  // progress 1 when wrapper-bottom = viewport-top (wrapper scrolled fully past).
+  const { scrollYProgress } = useScroll({
+    target: wrapperRef,
+    offset: ["start start", "end start"],
+  });
+
+  // Only scale non-last cards. Animation begins at 40% scroll and completes at 90%.
+  const scale = useTransform(
+    scrollYProgress,
+    isLast ? [0, 1] : [0.4, 0.9],
+    isLast ? [1, 1] : [1, 0.88]
+  );
+  const opacity = useTransform(
+    scrollYProgress,
+    isLast ? [0, 1] : [0.5, 0.9],
+    isLast ? [1, 1] : [1, 0.72]
+  );
+
   const Icon = feature.icon;
 
-  // Card starts scaling down when the NEXT card arrives
-  const pushStart = (index + 1) / total;
-  const pushEnd = Math.min(pushStart + 0.09, 1);
-
-  const scale = useTransform(progress, [pushStart, pushEnd], [1, 0.88]);
-  const opacity = useTransform(progress, [pushStart, pushEnd], [1, 0.68]);
-  const y = useTransform(progress, [pushStart, pushEnd], [0, -16]);
-
   return (
-    /* Each wrapper provides scroll space; the inner card is sticky */
-    <div style={{ minHeight: "48vh" }}>
+    // Wrapper provides the scroll space for this card's "slot".
+    // Last card gets minimal height to avoid a trailing gap.
+    <div
+      ref={wrapperRef}
+      style={{ minHeight: isLast ? "auto" : "calc(100vh - 100px)" }}
+    >
       <motion.div
         style={{
           scale,
           opacity,
-          y,
           position: "sticky",
-          top: 80 + index * 6,
+          top: 80 + index * 7,
           zIndex: index + 1,
           transformOrigin: "top center",
         }}
-        className={`rounded-2xl border ${feature.borderClass} bg-gradient-to-br ${feature.accentClass} shadow-card overflow-hidden`}
+        className={`rounded-2xl border ${feature.borderClass} bg-gradient-to-br ${feature.bgFrom} to-white shadow-card overflow-hidden`}
       >
         <div className="grid md:grid-cols-[1fr_40%]">
-          {/* Text panel */}
+          {/* Text */}
           <div className="p-7 lg:p-9 flex flex-col justify-center">
             <div className={`inline-flex w-11 h-11 rounded-xl border items-center justify-center mb-5 ${feature.iconClass}`}>
               <Icon size={18} />
@@ -401,9 +307,8 @@ function StackCard({
             </h3>
             <p className="text-sm text-[#4A5E56] leading-relaxed max-w-xs">{feature.desc}</p>
           </div>
-
-          {/* Mockup panel */}
-          <div className="border-t md:border-t-0 md:border-l border-[rgba(42,82,64,0.08)] bg-[#0D1E15]/3 p-6 flex items-center justify-center min-h-[180px]">
+          {/* Mockup */}
+          <div className="border-t md:border-t-0 md:border-l border-[rgba(42,82,64,0.08)] bg-[#0A1A10]/2 p-6 flex items-center justify-center min-h-[180px]">
             <div className="w-full">{feature.mockup}</div>
           </div>
         </div>
@@ -414,14 +319,8 @@ function StackCard({
 
 /* ── Section ── */
 export default function Features() {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start start", "end end"],
-  });
-
   return (
-    <section id="features" className="py-16 bg-white relative overflow-hidden">
+    <section id="features" className="pt-16 pb-8 bg-white relative overflow-hidden">
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-24 bg-gradient-to-b from-transparent to-[rgba(42,82,64,0.12)]" />
 
       <div className="max-w-5xl mx-auto px-6">
@@ -444,20 +343,10 @@ export default function Features() {
           </p>
         </motion.div>
 
-        {/* Stacking cards */}
-        <div ref={sectionRef}>
-          {features.map((f, i) => (
-            <StackCard
-              key={f.title}
-              feature={f}
-              index={i}
-              total={features.length}
-              progress={scrollYProgress}
-            />
-          ))}
-          {/* bottom spacer so last card scrolls into view properly */}
-          <div className="h-[30vh]" />
-        </div>
+        {/* Stacking cards — each wrapper provides per-card scroll space */}
+        {features.map((f, i) => (
+          <StackCard key={f.title} feature={f} index={i} total={features.length} />
+        ))}
       </div>
     </section>
   );
