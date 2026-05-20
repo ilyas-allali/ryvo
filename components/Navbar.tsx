@@ -63,7 +63,7 @@ export default function Navbar() {
         {/* CTA */}
         <div className="hidden md:flex items-center gap-3">
           <a
-            href="#demo"
+            href="/demo"
             className="px-4 py-2 text-sm font-medium text-[#2A5240] hover:text-[#1C3A2B] transition-colors"
           >
             Voir la démo
