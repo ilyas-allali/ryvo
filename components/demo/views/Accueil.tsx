@@ -3,8 +3,9 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Send, Sparkles, Plus, AlertTriangle, RotateCcw } from "lucide-react";
-import { BRIEFING, COMPANY, KPIS, SANTE_BREAKDOWN, SUGGESTED_QUESTIONS, BANK_ACCOUNTS } from "@/lib/demo-data";
+import { BRIEFING, KPIS, SANTE_BREAKDOWN, SUGGESTED_QUESTIONS, BANK_ACCOUNTS } from "@/lib/demo-data";
 import { ScoreRing, LineChart } from "../charts";
+import RichMessage from "../RichMessage";
 
 type Msg = { role: "user" | "assistant"; text: string };
 
@@ -168,30 +169,37 @@ export default function Accueil() {
                 <RotateCcw size={13} />
               </button>
             </div>
-            <div className="space-y-3 max-h-[420px] overflow-y-auto pr-1">
+            <div className="space-y-3 max-h-[520px] overflow-y-auto pr-1">
               <AnimatePresence>
-                {displayMessages.map((msg, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.22 }}
-                    className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-                  >
-                    <div
-                      className={`max-w-[85%] px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${
-                        msg.role === "user"
-                          ? "bg-[#2A5240] text-white rounded-br-sm"
-                          : "bg-[#FAFAF7] border border-[rgba(42,82,64,0.1)] text-[#1A2B24] rounded-bl-sm"
-                      }`}
+                {displayMessages.map((msg, i) => {
+                  const isStreaming = loading && i === displayMessages.length - 1 && msg.role === "assistant";
+                  return (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.22 }}
+                      className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
                     >
-                      {msg.text}
-                      {msg.role === "assistant" && i === displayMessages.length - 1 && loading && (
-                        <span className="inline-block w-2 h-4 bg-[#2A5240] ml-0.5 animate-blink align-middle" />
+                      {msg.role === "user" ? (
+                        <div className="max-w-[80%] px-4 py-3 rounded-2xl rounded-br-sm bg-[#2A5240] text-white text-sm leading-relaxed">
+                          {msg.text}
+                        </div>
+                      ) : (
+                        <div className="max-w-[92%] bg-white border border-[rgba(42,82,64,0.1)] rounded-2xl rounded-bl-sm px-4 py-4 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
+                          {isStreaming ? (
+                            <p className="text-sm text-[#1A2B24] leading-relaxed whitespace-pre-wrap">
+                              {msg.text}
+                              <span className="inline-block w-2 h-4 bg-[#2A5240] ml-0.5 animate-blink align-middle" />
+                            </p>
+                          ) : (
+                            <RichMessage content={msg.text} onAction={(action) => send(action)} />
+                          )}
+                        </div>
                       )}
-                    </div>
-                  </motion.div>
-                ))}
+                    </motion.div>
+                  );
+                })}
               </AnimatePresence>
               {loading && !streaming && (
                 <div className="flex justify-start">
